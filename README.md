@@ -7,8 +7,7 @@
 
 TypeScript-first wrapper for [RunPod Flash](https://github.com/runpod/flash).
 
-This is a small hackathon-friendly package with a practical joke inside: the
-best Python is the Python your TypeScript generated for you.
+![flashpod explainer](assets/flashpod-explainer.png)
 
 `flashpod` lets you define Flash endpoints in TypeScript, generate the tiny
 Python bridge that the official Flash builder expects, and then call

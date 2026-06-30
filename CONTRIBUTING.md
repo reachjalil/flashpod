@@ -9,6 +9,14 @@ npm install
 npm run check
 ```
 
+Useful focused commands:
+
+```bash
+npm run test:unit
+npm run test:e2e
+npm run test:package
+```
+
 Keep the first-party boundary clear:
 
 - TypeScript should own the user-facing config, CLI, and client.

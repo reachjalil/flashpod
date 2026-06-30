@@ -96,30 +96,49 @@ function parseArgs(args: string[]): ParsedArgs {
   const [command, ...rest] = args;
   const passthrough: string[] = [];
   const flags = new Map<string, string | boolean>();
+  const internalValueFlags = new Set(["--config", "--out"]);
+  const internalBooleanFlags = new Set(["--dry-run", "--force"]);
 
   for (let index = 0; index < rest.length; index += 1) {
     const value = rest[index];
-    if (!value?.startsWith("--")) {
+    if (!value) continue;
+    if (!value.startsWith("--")) {
       passthrough.push(value ?? "");
       continue;
     }
+
     if (value.includes("=")) {
       const [key, raw] = value.split(/=(.*)/s, 2);
-      flags.set(key ?? value, raw ?? "");
+      if (key && internalValueFlags.has(key)) {
+        flags.set(key, raw ?? "");
+      } else if (key && internalBooleanFlags.has(key)) {
+        flags.set(key, raw ?? true);
+      } else {
+        passthrough.push(value);
+      }
       continue;
     }
-    const next = rest[index + 1];
-    if (next && !next.startsWith("--")) {
+
+    if (internalBooleanFlags.has(value)) {
+      flags.set(value, true);
+      continue;
+    }
+
+    if (internalValueFlags.has(value)) {
+      const next = rest[index + 1];
+      if (!next || next.startsWith("--")) {
+        throw new Error(`${value} requires a value.`);
+      }
       flags.set(value, next);
       index += 1;
-    } else {
-      flags.set(value, true);
+      continue;
     }
-  }
 
-  for (const [key, value] of flags) {
-    if (!["--config", "--out", "--dry-run", "--force"].includes(key)) {
-      passthrough.push(value === true ? key : `${key}=${value}`);
+    passthrough.push(value);
+    const next = rest[index + 1];
+    if (next && !next.startsWith("--")) {
+      passthrough.push(next);
+      index += 1;
     }
   }
 

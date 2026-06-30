@@ -1,5 +1,10 @@
 # ts-flash
 
+[![ci](https://github.com/reachjalil/ts-flash/actions/workflows/ci.yml/badge.svg)](https://github.com/reachjalil/ts-flash/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/ts-flash.svg)](https://www.npmjs.com/package/ts-flash)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js >=20.11](https://img.shields.io/badge/node-%3E%3D20.11-339933.svg)](package.json)
+
 TypeScript-first wrapper for [RunPod Flash](https://github.com/runpod/flash).
 
 This is a small hackathon-friendly package with a practical joke inside: the
@@ -18,6 +23,7 @@ It is not an official RunPod package.
 - CLI lifecycle wrapper around the official `flash` command
 - TypeScript client for RunPod queue and load-balanced endpoint calls
 - npm-ready package named `ts-flash`
+- Unit, CLI e2e, package-smoke, and generated Python bridge tests
 
 ## Install
 
@@ -105,6 +111,32 @@ ts-flash doctor
 `dev`, `build`, and `deploy` generate the bridge first, then run the official
 Flash CLI.
 
+## Verification
+
+The package has four local verification layers:
+
+```bash
+npm run typecheck       # strict TypeScript
+npm run test:unit       # renderer + client behavior
+npm run test:e2e        # CLI + generated bridge + fake flash binary
+npm run test:package    # npm pack/install smoke test
+```
+
+`npm run check` runs all of them.
+
+GitHub Actions runs those checks across Node 20, 22, and 24. A second CI job
+installs the official `runpod-flash` package, generates `flash_app.py`, compiles
+it with Python, and imports it so the bridge stays compatible with Flash’s
+scanner/decorator pattern.
+
+## Release
+
+The repository includes a release workflow for npm. To publish:
+
+1. Create an npm automation token and save it as `NPM_TOKEN` in GitHub secrets.
+2. Create a GitHub release or run the `release` workflow manually.
+3. The workflow runs `npm run check`, then publishes with npm provenance.
+
 ## Scope
 
 This package deliberately starts as a wrapper. It follows the same boundary I
@@ -116,6 +148,8 @@ use in production TypeScript/Python projects:
   is worth building.
 
 See [docs/migration-plan.md](docs/migration-plan.md).
+See [docs/flash-compatibility.md](docs/flash-compatibility.md) for the exact
+bridge contract this package keeps with the official Flash SDK.
 
 ## Publishing
 

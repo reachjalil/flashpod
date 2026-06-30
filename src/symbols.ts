@@ -89,14 +89,19 @@ export const DataCenter = enumObject("DataCenter", [
 export const ServerlessScalerType = enumObject("ServerlessScalerType", [
   "QUEUE_DELAY",
   "REQUEST_COUNT",
-  "CONCURRENCY",
 ] as const);
 
 export const CudaVersion = enumObject("CudaVersion", [
-  "V12_8",
-  "V12_6",
-  "V12_4",
-  "V12_2",
-  "V12_1",
   "V11_8",
+  "V12_0",
+  "V12_1",
+  "V12_2",
+  "V12_3",
+  "V12_4",
+  "V12_5",
+  "V12_6",
+  "V12_7",
+  "V12_8",
+  "V12_9",
+  "V13_0",
 ] as const);

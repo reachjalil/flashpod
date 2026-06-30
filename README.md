@@ -13,7 +13,7 @@ TypeScript-first wrapper for [RunPod Flash](https://github.com/runpod/flash).
 Python bridge that the official Flash builder expects, and then call
 `flash dev`, `flash build`, or `flash deploy` from the same CLI.
 
-It is not an official RunPod package.
+`flashpod` is community-maintained and is not an official RunPod package.
 
 ## What works now
 
@@ -34,18 +34,32 @@ uv tool install runpod-flash
 Flash still needs its official Python CLI installed locally because this first
 version delegates deployment to `runpod-flash`.
 
-## Quickstart
+Requirements:
+
+- Node.js 20.11 or newer
+- Python with the official `runpod-flash` CLI available as `flash`
+- A RunPod API key for deploys and endpoint calls
+
+## Getting Started With npx
+
+You can try `flashpod` in any TypeScript project without installing it globally:
+
+```bash
+npm install flashpod
+uv tool install runpod-flash
+npx flashpod doctor
+```
+
+Create the starter config:
 
 ```bash
 npx flashpod init
-npx flashpod generate
-npx flashpod deploy --env production
 ```
 
-Example config:
+That writes `flashpod.config.ts`:
 
 ```ts
-import { CpuInstanceType, defineConfig, endpoint, handler, route } from "flashpod";
+import { CpuInstanceType, defineConfig, endpoint, handler } from "flashpod";
 
 export default defineConfig({
   app: "hello-flashpod",
@@ -57,28 +71,34 @@ export default defineConfig({
       workers: [0, 1],
       handler: handler.json({
         ok: true,
-        message: "Configured in TypeScript. Deployed by Flash.",
+        message: "Hello from generated Flash glue. Python has been politely abstracted.",
       }),
-    }),
-
-    endpoint.loadBalanced({
-      name: "api",
-      cpu: CpuInstanceType.CPU3C_1_2,
-      workers: [0, 2],
-      routes: [
-        route.get("/health", handler.json({ ok: true })),
-        route.post("/echo", handler.echo()),
-      ],
     }),
   ],
 });
 ```
 
-Generated bridge:
+Generate the Python bridge Flash expects:
 
 ```bash
 npx flashpod generate --dry-run
+npx flashpod generate
 ```
+
+Deploy through the official Flash CLI:
+
+```bash
+export RUNPOD_API_KEY="..."
+npx flashpod login
+npx flashpod deploy --env production
+```
+
+`npx flashpod dev` and `npx flashpod build` work the same way: `flashpod`
+generates `flash_app.py` first, then passes your remaining arguments to the
+official `flash` command.
+
+For a larger example with a GPU queue endpoint and a load-balanced API, see
+[examples/flashpod.config.ts](examples/flashpod.config.ts).
 
 ## Calling endpoints from TypeScript
 
@@ -94,6 +114,9 @@ const job = await endpoint.runsync<{ prompt: string }, { text: string }>({
 
 console.log(job.output);
 ```
+
+Do not ship `RUNPOD_API_KEY` to a browser bundle. Use `FlashClient` from a
+server process, worker, CLI, or trusted backend.
 
 ## CLI
 
@@ -149,6 +172,14 @@ use in production TypeScript/Python projects:
 See [docs/migration-plan.md](docs/migration-plan.md).
 See [docs/flash-compatibility.md](docs/flash-compatibility.md) for the exact
 bridge contract this package keeps with the official Flash SDK.
+
+## Contributing
+
+Issues and focused pull requests are welcome. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md), keep generated Python bridge output simple,
+and run `npm run check` before opening a PR.
+
+Security reports should follow [SECURITY.md](SECURITY.md).
 
 ## Publishing
 
